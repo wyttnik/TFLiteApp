@@ -86,10 +86,8 @@ class OCRModelExecutor(context: Context, useGPU: Boolean = false) : AutoCloseabl
     }
 
     detectionInterpreter = getInterpreter(context, textDetectionModel, useGPU)
-    Log.d(TAG, "detectionInterpreter loaded")
     // Recognition model requires Flex so we disable GPU delegate no matter user choice
     recognitionInterpreter = getInterpreter(context, textRecognitionModel, false)
-    Log.d(TAG, "recognitionInterpreter loaded")
 
     recognitionResult = ByteBuffer.allocateDirect(recognitionModelOutputSize * 8)
     recognitionResult.order(ByteOrder.nativeOrder())
@@ -311,7 +309,6 @@ class OCRModelExecutor(context: Context, useGPU: Boolean = false) : AutoCloseabl
         if (alphabetIndex in alphabets.indices)
           recognizedText += alphabets[alphabetIndex]
       }
-      Log.d("Recognition result:", recognizedText)
       ocrText += "$recognizedText "
       if (recognizedText != "") {
         ocrResults[recognizedText] = getRandomColor()
@@ -339,24 +336,18 @@ class OCRModelExecutor(context: Context, useGPU: Boolean = false) : AutoCloseabl
     modelName: String,
     useGpu: Boolean = false
   ): Interpreter {
-    Log.d("fef", "getInterpreter")
     val tfliteOptions = Interpreter.Options()
 
 
     gpuDelegate = null
     if (useGpu) {
       val comp = CompatibilityList().bestOptionsForThisDevice
-      Log.d("fef", "dffddfd")
       gpuDelegate = GpuDelegate(comp)
-      Log.d("fef", "dffddfdContinue")
       tfliteOptions.addDelegate(gpuDelegate)
-      Log.d("fef", "dffddfdEnd")
     }
     else {
       tfliteOptions.numThreads = numberThreads
     }
-
-    Log.d("fef", "getInterpreter $modelName $tfliteOptions")
     return Interpreter(loadModelFile(context, modelName), tfliteOptions)
   }
 

@@ -104,31 +104,6 @@ class MainActivity : AppCompatActivity() {
     setSupportActionBar(toolbar)
     supportActionBar?.setDisplayShowTitleEnabled(false)
 
-//    tfImageView = findViewById(R.id.tf_imageview)
-//    androidImageView = findViewById(R.id.android_imageview)
-//    chromeImageView = findViewById(R.id.chrome_imageview)
-
-    //val candidateImageViews = arrayOf<ImageView>(tfImageView, androidImageView, chromeImageView)
-
-//    val assetManager = assets
-//    try {
-//      val tfInputStream: InputStream = assetManager.open(tfImageName)
-//      val tfBitmap = BitmapFactory.decodeStream(tfInputStream)
-//      tfImageView.setImageBitmap(tfBitmap)
-//      val androidInputStream: InputStream = assetManager.open(androidImageName)
-//      val androidBitmap = BitmapFactory.decodeStream(androidInputStream)
-//      androidImageView.setImageBitmap(androidBitmap)
-//      val chromeInputStream: InputStream = assetManager.open(chromeImageName)
-//      val chromeBitmap = BitmapFactory.decodeStream(chromeInputStream)
-//      chromeImageView.setImageBitmap(chromeBitmap)
-//    } catch (e: IOException) {
-//      Log.e(TAG, "Failed to open a test image")
-//    }
-//
-//    for (iv in candidateImageViews) {
-//      setInputImageViewListener(iv)
-//    }
-
     resultImageView = findViewById(R.id.result_imageview)
     chipsGroup = findViewById(R.id.chips_group)
     //textPromptTextView = findViewById(R.id.text_prompt)
@@ -156,19 +131,16 @@ class MainActivity : AppCompatActivity() {
 
     useGpuSwitch.setOnCheckedChangeListener { _, isChecked ->
       useGPU = isChecked
-      Log.d("fef", "switch switched")
       mainScope.async(inferenceThread) { createModelExecutor(useGPU) }
     }
 
     runButton = findViewById(R.id.rerun_button)
     runButton.setOnClickListener {
-      Log.d("fef", "start $ocrModel")
       enableControls(false)
 
       mainScope.async(inferenceThread) {
         mutex.withLock {
           if (ocrModel != null) {
-            Log.d("fef", "start $ocrModel")
             viewModel.onApplyModel(baseContext, selectedImageName, ocrModel, inferenceThread)
           } else {
             Log.d(
@@ -189,29 +161,7 @@ class MainActivity : AppCompatActivity() {
     galleryActivityResultLauncher.launch(galleryIntent)
   }
 
-//  @SuppressLint("ClickableViewAccessibility")
-//  private fun setInputImageViewListener(iv: ImageView) {
-//    iv.setOnTouchListener(
-//      object : View.OnTouchListener {
-//        override fun onTouch(v: View, event: MotionEvent?): Boolean {
-//          if (v.equals(tfImageView)) {
-//            selectedImageName = tfImageName
-//            textPromptTextView.setText(getResources().getString(R.string.tfe_using_first_image))
-//          } else if (v.equals(androidImageView)) {
-//            selectedImageName = androidImageName
-//            textPromptTextView.setText(getResources().getString(R.string.tfe_using_second_image))
-//          } else if (v.equals(chromeImageView)) {
-//            selectedImageName = chromeImageName
-//            textPromptTextView.setText(getResources().getString(R.string.tfe_using_third_image))
-//          }
-//          return false
-//        }
-//      }
-//    )
-//  }
-
   private suspend fun createModelExecutor(useGPU: Boolean) {
-    Log.d("fef", "start createModelExecutor")
     mutex.withLock {
       if (ocrModel != null) {
         ocrModel!!.close()
@@ -219,7 +169,6 @@ class MainActivity : AppCompatActivity() {
       }
       try {
         ocrModel = OCRModelExecutor(this, useGPU)
-        Log.d("fef", "end createModelExecutor")
       } catch (e: Exception) {
         Log.e(TAG, "Fail to create OCRModelExecutor: ${e.message}")
         val logText: TextView = findViewById(R.id.log_view)
@@ -266,9 +215,7 @@ class MainActivity : AppCompatActivity() {
     setImageView(resultImageView, modelExecutionResult.bitmapResult)
     val logText: TextView = findViewById(R.id.log_view)
     logText.text = modelExecutionResult.executionLog
-    //////////////////////////////////////////////////////////
     resultTextView.text = modelExecutionResult.resText
-    //////////////////////////////////////////////////////////
 
     setChipsToLogView(modelExecutionResult.itemsFound)
     enableControls(true)
